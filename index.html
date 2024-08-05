@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Canvas with Image Upload and Clickable Circles</title>
+  <title>Canvas with Image Upload and Removable Circles</title>
   <style>
     canvas {
       border: 1px solid black;
@@ -36,18 +36,35 @@
       }
     });
 
-    // Store the positions of circles
+    // Store the positions and radius of circles
     const circles = [];
+    const circleRadius = 10;
 
-    // Handle canvas clicks to draw circles
+    // Handle canvas clicks to draw or remove circles
     canvas.addEventListener('click', (event) => {
       // Get the mouse position relative to the canvas
       const rect = canvas.getBoundingClientRect();
       const x = event.clientX - rect.left;
       const y = event.clientY - rect.top;
 
-      // Store the circle position
-      circles.push({ x, y });
+      // Check if the click is on an existing circle
+      let clickedOnCircle = false;
+      for (let i = 0; i < circles.length; i++) {
+        const circle = circles[i];
+        const distance = Math.hypot(circle.x - x, circle.y - y);
+
+        if (distance < circleRadius) {
+          // Remove the circle if clicked
+          circles.splice(i, 1);
+          clickedOnCircle = true;
+          break;
+        }
+      }
+
+      // If not clicked on an existing circle, add a new circle
+      if (!clickedOnCircle) {
+        circles.push({ x, y });
+      }
 
       // Redraw the image and circles
       ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
@@ -59,7 +76,7 @@
     // Function to draw a circle
     function drawCircle(x, y) {
       ctx.beginPath();
-      ctx.arc(x, y, 10, 0, Math.PI * 2, false); // Radius of 10
+      ctx.arc(x, y, circleRadius, 0, Math.PI * 2, false);
       ctx.fillStyle = 'red';
       ctx.fill();
       ctx.closePath();
