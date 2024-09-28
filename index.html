@@ -21,7 +21,6 @@
       // Assignment 2 : ED5310
 // Maadhav Patel , EE22B0333
 
-import java.lang.Math; 
 
 
 
@@ -59,10 +58,17 @@ void setup(){
 
 }
 
+int floorMod(int  x,int n){
+      while(x<0){
+        x+=n;
+      }
+      return x%n;
+}
 
 float calcDist(float[] a , float[] b){
   return (float) Math.sqrt( Math.pow(a[1]-b[1] , 2) + Math.pow(a[0]-b[0],2) );
 }
+      
 void handleClick( float[] pos){
   for(float[] pt: poly ){
     if(calcDist(pt, pos)<effDist){
@@ -247,8 +253,8 @@ boolean Intersect(float[] a , float[] b,float[] c , float[] d ){
 boolean Diagonalie(int i , int j){
   int n = poly2.size() ; 
   for(int p =0 ; p < n ; p++){
-    int p1 = Math.floorMod( p,n);
-    int p2 = Math.floorMod((p+1),n);
+    int p1 = floorMod( p,n);
+    int p2 = floorMod((p+1),n);
     if ( i!=p1 && j!=p1 && i != p2 && j!=p2 && Intersect(poly2.get(i) , poly2.get(j) , poly2.get(p1) , poly2.get(p2))) return false;
   }
   return true;
@@ -256,8 +262,8 @@ boolean Diagonalie(int i , int j){
 
 boolean InCone(int i , int j ) {
   int n = poly2.size() ; 
-  int a1 = Math.floorMod((i+1),n) ; 
-  int a0 = Math.floorMod((i-1),n);
+  int a1 = floorMod((i+1),n) ; 
+  int a0 = floorMod((i-1),n);
   
   //a is Convex
   //print(i , a0,a1, n);
@@ -283,9 +289,9 @@ void EarInit(){
   for(int p =0 ; p < n ; p++){
     //println(p);
    
-    int p0 =  Math.floorMod((p-1),n);
-    int p1 =  Math.floorMod(p,n);
-    int p2 = Math.floorMod((p+1),n);
+    int p0 =  floorMod((p-1),n);
+    int p1 =  floorMod(p,n);
+    int p2 = floorMod((p+1),n);
     //println(p0,p2);
       ears.add(Boolean.valueOf((Diagonal(p0 , p2))));
      //println("Ear" , p1,ears.get(p));
@@ -307,10 +313,10 @@ void Triangulate(){
     for(int p =0 ; p < n ; p++){
       v2 = (v2 + p)%n;
       if( ears.get(v2)){
-        v3 = Math.floorMod((v2+1),n );
-        v4 = Math.floorMod((v2+2),n) ;
-        v1= Math.floorMod((v2-1),n);
-        v0= Math.floorMod((v2-2),n);
+        v3 = floorMod((v2+1),n );
+        v4 = floorMod((v2+2),n) ;
+        v1= floorMod((v2-1),n);
+        v0= floorMod((v2-2),n);
         ears.set( v1,Diagonal(v0, v3));
         ears.set( v3,Diagonal(v1 , v4));
         
@@ -349,8 +355,8 @@ void Triangulate_n_3(){
     for(int p =0 ; p < n ; p++){
       v2 = p;
       if( ears.get(v2)){
-        v3 = Math.floorMod((v2+1),n );
-        v1= Math.floorMod((v2-1),n);
+        v3 = floorMod((v2+1),n );
+        v1= floorMod((v2-1),n);
         
 
         triangleEdges.add(new float[][]{poly2.get(v1) , poly2.get(v3)});
