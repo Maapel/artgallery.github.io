@@ -1,86 +1,24 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Canvas with Image Upload and Removable Circles</title>
-  <style>
-    canvas {
-      border: 1px solid black;
-    }
-  </style>
-</head>
-<body>
-  <input type="file" id="upload" accept="image/*">
-  <canvas id="canvas" width="800" height="600"></canvas>
-  <script>
-    // Get the canvas and its context
-    const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
-    let image = new Image();
+<!Doctype: HTML w/ Processing>
 
-    // Handle file upload
-    document.getElementById('upload').addEventListener('change', (event) => {
-      const file = event.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          image.src = e.target.result;
-          image.onload = () => {
-            // Draw the uploaded image onto the canvas
-            ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
-            ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-          };
-        };
-        reader.readAsDataURL(file);
-      }
-    });
+<html>
 
-    // Store the positions and radius of circles
-    const circles = [];
-    const circleRadius = 10;
+  <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+      <title>Processing Demo</title>
+      <script type="text/javascript" src="js/processing.js"></script>
+  </head>
+  
+  <body>
+    <h1>PUT YOUR TITLE HERE</h1>
+    <p>ADD DESCRIPTION HERE</p>
+    
+    <script type="text/processing">
+    
+      /*  INSERT CODE HERE */
 
-    // Handle canvas clicks to draw or remove circles
-    canvas.addEventListener('click', (event) => {
-      // Get the mouse position relative to the canvas
-      const rect = canvas.getBoundingClientRect();
-      const x = event.clientX - rect.left;
-      const y = event.clientY - rect.top;
-
-      // Check if the click is on an existing circle
-      let clickedOnCircle = false;
-      for (let i = 0; i < circles.length; i++) {
-        const circle = circles[i];
-        const distance = Math.hypot(circle.x - x, circle.y - y);
-
-        if (distance < circleRadius) {
-          // Remove the circle if clicked
-          circles.splice(i, 1);
-          clickedOnCircle = true;
-          break;
-        }
-      }
-
-      // If not clicked on an existing circle, add a new circle
-      if (!clickedOnCircle) {
-        circles.push({ x, y });
-      }
-
-      // Redraw the image and circles
-      ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-      circles.forEach(circle => {
-        drawCircle(circle.x, circle.y);
-      });
-    });
-
-    // Function to draw a circle
-    function drawCircle(x, y) {
-      ctx.beginPath();
-      ctx.arc(x, y, circleRadius, 0, Math.PI * 2, false);
-      ctx.fillStyle = 'red';
-      ctx.fill();
-      ctx.closePath();
-    }
-  </script>
-</body>
+    </script>
+    <canvas id="sketch" style="border: 1px solid black;"></canvas>
+    
+  </body>
+  
 </html>
