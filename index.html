@@ -157,8 +157,8 @@ void keyPressed() {
          int timeStart =  (minute()*60*60 )+ (second()*60) + millis();
          println("Triangulation Started");
           for(int cnt = 0 ; (cnt< epochs)&&(!DRAWN);cnt++){
-            //Triangulate();
-            Triangulate_n_3();
+            Triangulate();
+            //Triangulate_n_3();
             
           }
           println("Triangulation Ended");
@@ -373,11 +373,8 @@ void Triangulate_n_3(){
       DRAWN = true;
       break;
     }
-    else n= poly2.size();
-    
-  }
- 
-  
+    else n= poly2.size(); 
+  } 
 }
 
     </script>
