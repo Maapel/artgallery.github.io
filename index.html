@@ -6,24 +6,375 @@
       <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
       <title>Processing Demo</title>
       <script type="text/javascript" src="js/processing.js"></script>
+    <script src ="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.7.3/p5.min.js"></script>
+    <script src ="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.7.3/addons/p5.dom.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.7.3/addons/p5.sound.min.js"></script>
   </head>
   
   <body>
     <h1>PUT YOUR TITLE HERE</h1>
     <p>ADD DESCRIPTION HERE</p>
     
-   <script type="application/processing">
-void setup() {
-  size(300, 300);
-  background(32);
+    <script type="application/processing">
+    
+      /*  INSERT CODE HERE */
+      // Assignment 2 : ED5310
+// Maadhav Patel , EE22B0333
+
+import java.lang.Math; 
+
+
+
+// SETUP
+float effDist = 10;
+int BGCOLOR = 120;
+
+boolean ANIMATION = true;
+float timeDur = 0.3;
+int fps = 10;
+int step = 0 ;
+int diagColor =200;
+int edgeColor =15;
+int epochs = 50000;
+
+//INITIALIZE
+boolean EDITMODE = true;
+boolean DRAWN = false;
+boolean inp = false;
+ArrayList<float[]> poly = new ArrayList<float[]>(); 
+ArrayList<Boolean> ears = new ArrayList<Boolean>();
+ArrayList<float[][]> triangleEdges= new ArrayList<float[][]>(); 
+ArrayList<float[]> poly2;
+PrintWriter input;
+PrintWriter output;
+PrintWriter timings;
+
+double lastTimeElapsed  ;
+
+void setup(){
+  size(1000,1000);
+  background(BGCOLOR);
+  frameRate(fps);
+  
+
 }
 
-void draw() {
-  if (mousePressed) {
-    ellipse(mouseX, mouseY, 25, 25);
+
+float calcDist(float[] a , float[] b){
+  return (float) Math.sqrt( Math.pow(a[1]-b[1] , 2) + Math.pow(a[0]-b[0],2) );
+}
+void handleClick( float[] pos){
+  for(float[] pt: poly ){
+    if(calcDist(pt, pos)<effDist){
+        poly.remove(pt);
+        return;
+    }
+  }
+  
+  poly.add(pos);
+  return;
+}
+void mouseClicked() {
+  if(!EDITMODE ) return;
+  float[] pos=new float[]{mouseX , mouseY};
+  handleClick(pos);
+  drawPoints();  
+}
+
+void drawPoints(){
+  background(BGCOLOR);
+  stroke(0);
+
+  fill(255);
+  for(float[] pos: poly ){
+    circle(pos[0] , pos[1], effDist);
   }
 }
-</script>
+
+void drawPoly(){
+  
+  if(EDITMODE || DRAWN) return;
+  print("." );
+  int i =(int) (step*1.0/(fps*timeDur));
+  float frac = (step*1.0/(fps*timeDur)) -i;
+  int n = poly.size();
+  float[] p1, p2 ; 
+  
+  background(BGCOLOR);
+  drawPoints();
+  stroke(diagColor);
+  for(int j = 0 ; j  < i-n ; j++){
+    line(  triangleEdges.get(j)[0][0],triangleEdges.get(j)[0][1] , triangleEdges.get(j)[1][0] ,triangleEdges.get(j)[1][1]);
+  }
+    stroke(edgeColor);
+
+  for(int j = 0 ; j  < i && j<n ; j++){
+    p1= poly.get(j%n);
+    p2= poly.get((j+1)%n);
+    line(p1[0], p1[1] , p2[0],p2[1]);
+  }
+  
+  if(i>=n + triangleEdges.size()) 
+  {
+    
+    step = 0;
+    println("drawn");
+    DRAWN = true;
+    text("Time Elapsed = " + lastTimeElapsed + " microsec", 40, 120); 
+    //showTriangles();
+    return;
+    
+  }
+  
+  
+  
+  
+  p1= poly.get(i%n);
+  p2= poly.get((i+1)%n);
+  if(i<n){
+    stroke(edgeColor);
+    line(p1[0], p1[1],(p2[0]-p1[0])*frac + p1[0], (p2[1]-p1[1])*frac + p1[1]);
+  }
+  else{
+    stroke(diagColor);
+    p1= triangleEdges.get(i-n)[0];
+    p2= triangleEdges.get(i-n)[1];
+    line(p1[0], p1[1],(p2[0]-p1[0])*frac + p1[0], (p2[1]-p1[1])*frac + p1[1]);
+  }
+  step++;
+  
+}
+void keyPressed() {
+  if ((key == 'E') || (key == 'e')) {
+    EDITMODE = !EDITMODE;
+     if(!EDITMODE){
+         int timeStart =  (minute()*60*60 )+ (second()*60) + millis();
+         println("Triangulation Started");
+          for(int cnt = 0 ; (cnt< epochs)&&(!DRAWN);cnt++){
+            //Triangulate();
+            Triangulate_n_3();
+            
+          }
+          println("Triangulation Ended");
+
+          int timeEnd =  (minute()*60*60 )+ (second()*60) + millis();
+          
+          lastTimeElapsed = ((double)(timeEnd- timeStart)*1000)/epochs;
+          input = createWriter( "logs/log_input.txt");
+          output = createWriter( "logs/log_result.txt");
+          //input = createWriter( "logs/log"+  day() + month() + year() + hour() + minute() + second()+"_input.txt");
+          //output = createWriter( "logs/log" + day() + month() + year() + hour() + minute() + second()+ "_result.txt");
+          String[] lines = loadStrings("logs/timings.txt");
+          timings = createWriter( "logs/timings.txt");
+          
+          for(int i = 0 ; i < lines.length; i++){
+            
+            timings.println(lines[i]);
+          }
+          timings.println(poly.size() + " " + lastTimeElapsed);
+          timings.flush();
+          timings.close();
+          for(float[] point: poly ) {
+            input.println(point[0] + " " +point[1]);
+          }
+          output.println("Time Elapsed = " + lastTimeElapsed + "microsec");
+           for(float[][] edge: triangleEdges ) {
+            output.println(edge[0][0]+" " + edge[0][1] + " " + edge[1][0]+" " +edge[1][1]);
+          }
+          input.flush();
+          output.flush();
+          input.close();
+          output.close();
+          
+     }
+     else{
+       DRAWN = false ; 
+     }
+  }
+ 
+}
+
+void showTriangles(){
+
+  
+   for( float[][] edge : triangleEdges){
+     println("edge" , edge);
+  }
+}
+void draw(){
+  drawPoly();
+  
+  
+}
+      
+float Area(float[] a , float[] b,float[] c ){
+  //The cordinate system is different , so anti-clockwise for us is -ve for it .
+  return -(((b[0]  - a[0])*(c[1]-a[1])) - ((c[0]-a[0])*(b[1]-a[1])));
+}
+boolean Left(float[] a , float[] b,float[] c ){
+  return Area(a,b,c)>0;
+}
+boolean LeftOn(float[] a , float[] b,float[] c ){
+  //println(Area(a,b,c));
+  return Area(a,b,c)>=0;
+}
+
+boolean Collinear(float[] a , float[] b,float[] c ){
+  return Area(a,b,c) ==0 ;
+}
+boolean XOR(boolean  a , boolean b ) {
+  return (a&& !b) || (!a&& b);
+}
+boolean IntersectProp(float[] a , float[] b,float[] c , float[] d ){
+  if (Collinear (a, b,c) ||Collinear (a, b,d) || Collinear (c,d, a) || Collinear(c,d,b))return false;
+  return  XOR(Left(a,b,c) ,Left(a,b,d)) && XOR(Left(c,d ,a),Left(c , d, b)) ;
+}
+boolean Between(float[] a , float[] b,float[] c ){
+  if(!Collinear(a,b,c)) return false;
+  if ( a[0]!=b[0]){
+    return((a[0]<=c[0])&&(c[0] <= b[0])) || ((a[0]>= c[0]) && (c[0]>= b[0]));
+  }
+  else{
+    return((a[1]<=c[1])&&(c[1] <= b[1])) || ((a[1]>= c[1]) && (c[1]>= b[1]));
+  }
+}
+
+boolean Intersect(float[] a , float[] b,float[] c , float[] d ){
+  if ( IntersectProp( a, b, c, d ) ) return true;
+  else if ( Between( a, b, c ) || Between( a, b, d )|| Between( c, d, a ) || Between( c, d, b ))return true;
+  else return false;
+}
+boolean Diagonalie(int i , int j){
+  int n = poly2.size() ; 
+  for(int p =0 ; p < n ; p++){
+    int p1 = Math.floorMod( p,n);
+    int p2 = Math.floorMod((p+1),n);
+    if ( i!=p1 && j!=p1 && i != p2 && j!=p2 && Intersect(poly2.get(i) , poly2.get(j) , poly2.get(p1) , poly2.get(p2))) return false;
+  }
+  return true;
+}
+
+boolean InCone(int i , int j ) {
+  int n = poly2.size() ; 
+  int a1 = Math.floorMod((i+1),n) ; 
+  int a0 = Math.floorMod((i-1),n);
+  
+  //a is Convex
+  //print(i , a0,a1, n);
+  //println("Convex point" , LeftOn(poly2.get(i) , poly2.get(a1) , poly2.get(a0)));
+  if(LeftOn(poly2.get(i) , poly2.get(a1) , poly2.get(a0))){
+    //println("Left i j a0" ,Left( poly2.get(i),poly2.get(j) , poly2.get(a0)) , "Left i a1 j" , Left( poly2.get(i),poly2.get(j) , poly2.get(a0)) );
+    return Left( poly2.get(i),poly2.get(j) , poly2.get(a0)) && Left( poly2.get(i), poly2.get(a1) , poly2.get(j));
+  }
+  return !(LeftOn(poly2.get(i) ,poly2.get(j) , poly2.get(a1))&& LeftOn(poly2.get(i) ,poly2.get(a0) , poly2.get(j)) ); 
+}
+
+
+boolean Diagonal(int i , int j ){
+  //println("Interior 1" , InCone(i , j));
+  //println("Interior 2" , InCone(j , i));
+  //println("Diagonal" , Diagonalie(i,j));
+
+  return InCone(i , j) && InCone(j,i) && Diagonalie(i,j);
+}
+
+void EarInit(){
+  int n = poly2.size() ; 
+  for(int p =0 ; p < n ; p++){
+    //println(p);
+   
+    int p0 =  Math.floorMod((p-1),n);
+    int p1 =  Math.floorMod(p,n);
+    int p2 = Math.floorMod((p+1),n);
+    //println(p0,p2);
+      ears.add(Boolean.valueOf((Diagonal(p0 , p2))));
+     //println("Ear" , p1,ears.get(p));
+  }
+}
+
+void Triangulate(){
+  // O(n) Ear Removal Algorithm
+  poly2 = new ArrayList<float[]>(poly);
+  ears = new ArrayList<Boolean>();
+  triangleEdges= new ArrayList<float[][]>(); 
+  
+  EarInit();
+  
+  int v0 , v1,v2=0,v3,v4 ; 
+  int n = poly2.size();
+  while(n>3){
+    
+    for(int p =0 ; p < n ; p++){
+      v2 = (v2 + p)%n;
+      if( ears.get(v2)){
+        v3 = Math.floorMod((v2+1),n );
+        v4 = Math.floorMod((v2+2),n) ;
+        v1= Math.floorMod((v2-1),n);
+        v0= Math.floorMod((v2-2),n);
+        ears.set( v1,Diagonal(v0, v3));
+        ears.set( v3,Diagonal(v1 , v4));
+        
+        triangleEdges.add(new float[][]{poly2.get(v1) , poly2.get(v3)});
+        
+        poly2.remove(v2);
+        ears.remove(v2);      
+        v2++;
+        break;
+      } 
+    }
+    if(n==poly2.size()){
+      println("Can't be triangulated");
+      DRAWN = true;
+      break;
+    }
+    else n= poly2.size();
+    
+  }
+ 
+  
+}
+
+void Triangulate_n_3(){
+  // O(n^3) Algorithm
+   poly2 = new ArrayList<float[]>(poly);
+  ears = new ArrayList<Boolean>();
+  triangleEdges= new ArrayList<float[][]>(); 
+  
+  EarInit();
+  
+  int v1,v2=0,v3; 
+  int n = poly2.size();
+  while(n>3){
+    
+    for(int p =0 ; p < n ; p++){
+      v2 = p;
+      if( ears.get(v2)){
+        v3 = Math.floorMod((v2+1),n );
+        v1= Math.floorMod((v2-1),n);
+        
+
+        triangleEdges.add(new float[][]{poly2.get(v1) , poly2.get(v3)});
+        
+        poly2.remove(v2);
+          ears = new ArrayList<Boolean>();
+
+        EarInit();
+        break;
+      } 
+    }
+    if(n==poly2.size()){
+      println("Can't be triangulated");
+      DRAWN = true;
+      break;
+    }
+    else n= poly2.size();
+    
+  }
+ 
+  
+}
+
+    </script>
     <canvas id="sketch" style="border: 1px solid black;"></canvas>
     
   </body>
