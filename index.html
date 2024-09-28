@@ -166,31 +166,8 @@ void keyPressed() {
           int timeEnd =  (minute()*60*60 )+ (second()*60) + millis();
           
           lastTimeElapsed = ((double)(timeEnd- timeStart)*1000)/epochs;
-          input = createWriter( "logs/log_input.txt");
-          output = createWriter( "logs/log_result.txt");
-          //input = createWriter( "logs/log"+  day() + month() + year() + hour() + minute() + second()+"_input.txt");
-          //output = createWriter( "logs/log" + day() + month() + year() + hour() + minute() + second()+ "_result.txt");
-          String[] lines = loadStrings("logs/timings.txt");
-          timings = createWriter( "logs/timings.txt");
           
-          for(int i = 0 ; i < lines.length; i++){
-            
-            timings.println(lines[i]);
-          }
-          timings.println(poly.size() + " " + lastTimeElapsed);
-          timings.flush();
-          timings.close();
-          for(float[] point: poly ) {
-            input.println(point[0] + " " +point[1]);
-          }
-          output.println("Time Elapsed = " + lastTimeElapsed + "microsec");
-           for(float[][] edge: triangleEdges ) {
-            output.println(edge[0][0]+" " + edge[0][1] + " " + edge[1][0]+" " +edge[1][1]);
-          }
-          input.flush();
-          output.flush();
-          input.close();
-          output.close();
+         
           
      }
      else{
