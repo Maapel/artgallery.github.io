@@ -13,13 +13,37 @@
       height: 100vh;
       margin: 0;
       background-color: #f0f0f0;
+      font-family: Arial, sans-serif;
+      color: #333;
     }
     canvas {
       border: 1px solid #000;
     }
+    #instructions {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: rgba(255, 255, 255, 0.8);
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      font-size: 14px;
+      max-width: 300px;
+    }
   </style>
 </head>
 <body>
+  <div id="instructions">
+    <h4>Instructions:</h4>
+    <ul>
+      <li><strong>Player Button:</strong> Click to add a player at the mouse position. The player moves towards the cursor.</li>
+      <li><strong>Start Simulation:</strong> Click to start the simulation. Enemies will chase the player.</li>
+      <li><strong>Pause Simulation:</strong> Click to pause the simulation and stop the movement.</li>
+      <li><strong>Add Enemy Points:</strong> Left-click to add enemy points. These points chase the player when in their Voronoi region.</li>
+      <li><strong>Remove Enemy Points:</strong> Right-click on an enemy point to remove it.</li>
+    </ul>
+  </div>
+
   <script>
     let enemyPoints = [];
     let playerPoint;
